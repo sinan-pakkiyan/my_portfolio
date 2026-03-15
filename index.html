@@ -1,0 +1,964 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Mohammed Sinan P — Odoo & Python Developer</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=Share+Tech+Mono&family=Inter:wght@300;400;500&display=swap"
+          rel="stylesheet"/>
+    <style>
+        :root {
+          --bg: #020b14;
+          --bg2: #040f1c;
+          --cyan: #00f5ff;
+          --cyan2: #00bcd4;
+          --green: #00ff88;
+          --orange: #ff6b00;
+          --text: #c8e6f5;
+          --dim: #4a7a99;
+          --card: rgba(0,245,255,0.03);
+          --border: rgba(0,245,255,0.12);
+        }
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        html { scroll-behavior: smooth; }
+
+        body {
+          background: var(--bg);
+          color: var(--text);
+          font-family: 'Inter', sans-serif;
+          font-weight: 300;
+          overflow-x: hidden;
+          cursor: none;
+        }
+
+        /* Custom cursor */
+        #cursor {
+          position: fixed; width: 12px; height: 12px;
+          background: var(--cyan); border-radius: 50%;
+          pointer-events: none; z-index: 9999;
+          transform: translate(-50%, -50%);
+          transition: width .2s, height .2s, opacity .2s;
+          box-shadow: 0 0 12px var(--cyan), 0 0 30px rgba(0,245,255,0.3);
+        }
+        #cursor-ring {
+          position: fixed; width: 36px; height: 36px;
+          border: 1px solid rgba(0,245,255,0.5); border-radius: 50%;
+          pointer-events: none; z-index: 9998;
+          transform: translate(-50%, -50%);
+          transition: transform .12s ease, width .2s, height .2s;
+        }
+
+        /* Scanline overlay */
+        body::before {
+          content: '';
+          position: fixed; inset: 0;
+          background: repeating-linear-gradient(
+            0deg,
+            transparent,
+            transparent 2px,
+            rgba(0,0,0,0.03) 2px,
+            rgba(0,0,0,0.03) 4px
+          );
+          pointer-events: none; z-index: 1000;
+        }
+
+        /* Grid background */
+        body::after {
+          content: '';
+          position: fixed; inset: 0;
+          background-image:
+            linear-gradient(rgba(0,245,255,0.04) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(0,245,255,0.04) 1px, transparent 1px);
+          background-size: 60px 60px;
+          pointer-events: none; z-index: 0;
+        }
+
+        /* NAV */
+        nav {
+          position: fixed; top: 0; left: 0; right: 0;
+          z-index: 500;
+          display: flex; align-items: center; justify-content: space-between;
+          padding: 18px 60px;
+          background: rgba(2,11,20,0.85);
+          backdrop-filter: blur(12px);
+          border-bottom: 1px solid var(--border);
+        }
+        .nav-logo {
+          font-family: 'Orbitron', monospace;
+          font-size: 1rem; font-weight: 700;
+          color: var(--cyan);
+          letter-spacing: 3px;
+          text-decoration: none;
+        }
+        .nav-logo span { color: var(--green); }
+        .nav-links { display: flex; gap: 36px; list-style: none; }
+        .nav-links a {
+          font-family: 'Share Tech Mono', monospace;
+          font-size: .78rem; color: var(--dim);
+          text-decoration: none; letter-spacing: 2px;
+          text-transform: uppercase;
+          transition: color .2s;
+          position: relative;
+        }
+        .nav-links a::after {
+          content: ''; position: absolute; bottom: -4px; left: 0; right: 0;
+          height: 1px; background: var(--cyan);
+          transform: scaleX(0); transition: transform .2s;
+        }
+        .nav-links a:hover { color: var(--cyan); }
+        .nav-links a:hover::after { transform: scaleX(1); }
+
+        /* Sections */
+        section { position: relative; z-index: 1; padding: 120px 60px; max-width: 1200px; margin: 0 auto; }
+
+        /* ── HERO ── */
+        #hero {
+          min-height: 100vh;
+          display: flex; align-items: center;
+          padding-top: 100px;
+          max-width: 100%;
+          padding-left: 60px; padding-right: 60px;
+        }
+        .hero-inner { max-width: 1200px; margin: 0 auto; width: 100%; }
+
+        .hero-tag {
+          font-family: 'Share Tech Mono', monospace;
+          font-size: .75rem; color: var(--green);
+          letter-spacing: 4px; text-transform: uppercase;
+          margin-bottom: 20px;
+          display: flex; align-items: center; gap: 12px;
+        }
+        .hero-tag::before {
+          content: ''; width: 30px; height: 1px; background: var(--green);
+        }
+
+        h1.hero-name {
+          font-family: 'Orbitron', monospace;
+          font-size: clamp(2.8rem, 6vw, 5.5rem);
+          font-weight: 900;
+          line-height: 1.05;
+          color: #fff;
+          text-transform: uppercase;
+          letter-spacing: 2px;
+          margin-bottom: 10px;
+        }
+        h1.hero-name .cyan { color: var(--cyan); }
+
+        .hero-title {
+          font-family: 'Share Tech Mono', monospace;
+          font-size: clamp(1rem, 2vw, 1.4rem);
+          color: var(--dim);
+          letter-spacing: 4px;
+          margin-bottom: 30px;
+          text-transform: uppercase;
+        }
+        .hero-title .highlight { color: var(--orange); }
+
+        .hero-desc {
+          max-width: 560px;
+          font-size: .95rem;
+          line-height: 1.8;
+          color: #7aabcc;
+          margin-bottom: 48px;
+        }
+
+        .hero-btns { display: flex; gap: 16px; flex-wrap: wrap; }
+
+        .btn-primary {
+          font-family: 'Orbitron', monospace;
+          font-size: .72rem; font-weight: 700;
+          letter-spacing: 3px; text-transform: uppercase;
+          padding: 14px 32px;
+          background: var(--cyan);
+          color: #020b14;
+          border: none; cursor: none;
+          clip-path: polygon(8px 0%, 100% 0%, calc(100% - 8px) 100%, 0% 100%);
+          text-decoration: none;
+          transition: box-shadow .2s, transform .2s;
+        }
+        .btn-primary:hover {
+          box-shadow: 0 0 30px rgba(0,245,255,0.6);
+          transform: translateY(-2px);
+        }
+
+        .btn-outline {
+          font-family: 'Orbitron', monospace;
+          font-size: .72rem; font-weight: 700;
+          letter-spacing: 3px; text-transform: uppercase;
+          padding: 13px 32px;
+          background: transparent;
+          color: var(--cyan);
+          border: 1px solid var(--cyan);
+          cursor: none;
+          clip-path: polygon(8px 0%, 100% 0%, calc(100% - 8px) 100%, 0% 100%);
+          text-decoration: none;
+          transition: background .2s, box-shadow .2s;
+        }
+        .btn-outline:hover {
+          background: rgba(0,245,255,0.08);
+          box-shadow: 0 0 20px rgba(0,245,255,0.2);
+        }
+
+        .hero-stats {
+          display: flex; gap: 48px; margin-top: 72px;
+          border-top: 1px solid var(--border);
+          padding-top: 40px;
+        }
+        .stat-num {
+          font-family: 'Orbitron', monospace;
+          font-size: 2rem; font-weight: 900;
+          color: var(--cyan);
+        }
+        .stat-label {
+          font-family: 'Share Tech Mono', monospace;
+          font-size: .7rem; color: var(--dim);
+          letter-spacing: 2px; text-transform: uppercase;
+          margin-top: 4px;
+        }
+
+        /* Floating HUD elements */
+        .hud-box {
+          position: absolute;
+          font-family: 'Share Tech Mono', monospace;
+          font-size: .65rem; color: var(--cyan);
+          opacity: 0.25; letter-spacing: 1px;
+          pointer-events: none;
+        }
+        .hud-tl { top: 120px; left: 20px; }
+        .hud-br { bottom: 40px; right: 20px; text-align: right; }
+
+        /* ── ABOUT ── */
+        .section-label {
+          font-family: 'Share Tech Mono', monospace;
+          font-size: .7rem; color: var(--green);
+          letter-spacing: 5px; text-transform: uppercase;
+          margin-bottom: 14px;
+          display: flex; align-items: center; gap: 14px;
+        }
+        .section-label::before {
+          content: ''; width: 20px; height: 1px; background: var(--green);
+        }
+
+        h2.section-title {
+          font-family: 'Orbitron', monospace;
+          font-size: clamp(1.8rem, 3.5vw, 3rem);
+          font-weight: 700; text-transform: uppercase;
+          color: #fff; letter-spacing: 1px;
+          margin-bottom: 60px;
+        }
+        h2.section-title span { color: var(--cyan); }
+
+        .about-grid {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 60px; align-items: start;
+        }
+
+        .about-text p {
+          font-size: .95rem; line-height: 1.9;
+          color: #7aabcc; margin-bottom: 20px;
+        }
+
+        .about-details {
+          display: flex; flex-direction: column; gap: 16px;
+          margin-top: 32px;
+        }
+        .detail-row {
+          display: flex; gap: 16px; align-items: center;
+          font-family: 'Share Tech Mono', monospace;
+          font-size: .8rem;
+        }
+        .detail-key { color: var(--dim); width: 90px; flex-shrink: 0; }
+        .detail-val { color: var(--text); }
+        .detail-val a { color: var(--cyan); text-decoration: none; }
+
+        /* Terminal card */
+        .terminal {
+          background: rgba(0,0,0,0.5);
+          border: 1px solid var(--border);
+          border-radius: 0;
+          overflow: hidden;
+          position: relative;
+        }
+        .terminal-bar {
+          background: rgba(0,245,255,0.06);
+          padding: 10px 16px;
+          display: flex; align-items: center; gap: 8px;
+          border-bottom: 1px solid var(--border);
+        }
+        .t-dot {
+          width: 10px; height: 10px; border-radius: 50%;
+        }
+        .t-dot.r { background: #ff5f57; }
+        .t-dot.y { background: #febc2e; }
+        .t-dot.g { background: #28c840; }
+        .terminal-title {
+          font-family: 'Share Tech Mono', monospace;
+          font-size: .7rem; color: var(--dim); margin-left: 8px;
+        }
+        .terminal-body { padding: 24px; }
+        .t-line {
+          font-family: 'Share Tech Mono', monospace;
+          font-size: .8rem; line-height: 1.9; color: #5aaa88;
+        }
+        .t-line .t-cyan { color: var(--cyan); }
+        .t-line .t-white { color: #ddd; }
+        .t-line .t-dim { color: var(--dim); }
+        .t-line .t-orange { color: var(--orange); }
+        .t-cursor {
+          display: inline-block; width: 8px; height: 14px;
+          background: var(--cyan); vertical-align: middle;
+          animation: blink 1s step-end infinite;
+        }
+        @keyframes blink { 50% { opacity: 0; } }
+
+        /* ── SKILLS ── */
+        .skills-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+          gap: 24px;
+        }
+
+        .skill-card {
+          background: var(--card);
+          border: 1px solid var(--border);
+          padding: 28px;
+          position: relative;
+          overflow: hidden;
+          transition: border-color .3s, transform .3s;
+        }
+        .skill-card::before {
+          content: '';
+          position: absolute; top: 0; left: 0;
+          width: 3px; height: 0;
+          background: var(--cyan);
+          transition: height .3s;
+        }
+        .skill-card:hover { border-color: rgba(0,245,255,0.35); transform: translateY(-4px); }
+        .skill-card:hover::before { height: 100%; }
+
+        .skill-icon {
+          font-size: 1.6rem; margin-bottom: 16px;
+        }
+        .skill-name {
+          font-family: 'Orbitron', monospace;
+          font-size: .8rem; font-weight: 700;
+          color: var(--cyan); letter-spacing: 2px;
+          text-transform: uppercase; margin-bottom: 8px;
+        }
+        .skill-tags { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+        .tag {
+          font-family: 'Share Tech Mono', monospace;
+          font-size: .65rem; color: var(--dim);
+          border: 1px solid rgba(0,245,255,0.15);
+          padding: 3px 10px;
+          letter-spacing: 1px;
+        }
+
+        /* ── PROJECTS ── */
+        .projects-grid {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 28px;
+        }
+
+        .project-card {
+          background: var(--card);
+          border: 1px solid var(--border);
+          padding: 36px;
+          position: relative;
+          overflow: hidden;
+          transition: border-color .3s;
+        }
+        .project-card::after {
+          content: '';
+          position: absolute;
+          top: -80px; right: -80px;
+          width: 200px; height: 200px;
+          background: radial-gradient(circle, rgba(0,245,255,0.05) 0%, transparent 70%);
+          pointer-events: none;
+          transition: opacity .3s;
+          opacity: 0;
+        }
+        .project-card:hover { border-color: rgba(0,245,255,0.3); }
+        .project-card:hover::after { opacity: 1; }
+
+        .project-num {
+          font-family: 'Orbitron', monospace;
+          font-size: .65rem; color: var(--dim);
+          letter-spacing: 3px; margin-bottom: 20px;
+        }
+        .project-name {
+          font-family: 'Orbitron', monospace;
+          font-size: 1rem; font-weight: 700;
+          color: #fff; margin-bottom: 14px;
+          text-transform: uppercase; letter-spacing: 1px;
+        }
+        .project-tech {
+          font-family: 'Share Tech Mono', monospace;
+          font-size: .7rem; color: var(--orange);
+          letter-spacing: 2px; margin-bottom: 20px;
+        }
+        .project-desc {
+          font-size: .88rem; line-height: 1.8;
+          color: #5a8aaa;
+        }
+        .project-bullets {
+          list-style: none; margin-top: 16px;
+        }
+        .project-bullets li {
+          font-size: .83rem; color: #5a8aaa;
+          line-height: 1.7; padding-left: 16px;
+          position: relative; margin-bottom: 6px;
+        }
+        .project-bullets li::before {
+          content: '▶'; position: absolute; left: 0;
+          color: var(--cyan); font-size: .5rem;
+          top: 5px;
+        }
+
+        /* ── EXPERIENCE TIMELINE ── */
+        .timeline { position: relative; padding-left: 40px; }
+        .timeline::before {
+          content: ''; position: absolute;
+          left: 0; top: 0; bottom: 0;
+          width: 1px; background: var(--border);
+        }
+
+        .tl-item { position: relative; margin-bottom: 60px; }
+        .tl-dot {
+          position: absolute; left: -44px; top: 4px;
+          width: 10px; height: 10px;
+          background: var(--cyan);
+          box-shadow: 0 0 12px var(--cyan);
+        }
+        .tl-date {
+          font-family: 'Share Tech Mono', monospace;
+          font-size: .7rem; color: var(--dim);
+          letter-spacing: 2px; margin-bottom: 10px;
+        }
+        .tl-role {
+          font-family: 'Orbitron', monospace;
+          font-size: .9rem; font-weight: 700;
+          color: var(--cyan); text-transform: uppercase;
+          letter-spacing: 1px; margin-bottom: 4px;
+        }
+        .tl-company {
+          font-family: 'Share Tech Mono', monospace;
+          font-size: .8rem; color: #fff; margin-bottom: 16px;
+        }
+        .tl-points { list-style: none; }
+        .tl-points li {
+          font-size: .87rem; color: #5a8aaa;
+          line-height: 1.8; padding-left: 16px;
+          position: relative; margin-bottom: 6px;
+        }
+        .tl-points li::before {
+          content: '//'; position: absolute; left: 0;
+          color: var(--green); font-family: 'Share Tech Mono', monospace;
+          font-size: .65rem; top: 3px;
+        }
+
+        /* ── CONTACT ── */
+        .contact-grid {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 60px; align-items: start;
+        }
+
+        .contact-info { display: flex; flex-direction: column; gap: 20px; }
+        .contact-item {
+          display: flex; gap: 20px; align-items: flex-start;
+          background: var(--card);
+          border: 1px solid var(--border);
+          padding: 20px 24px;
+          transition: border-color .3s;
+        }
+        .contact-item:hover { border-color: rgba(0,245,255,0.3); }
+        .ci-icon { font-size: 1.2rem; flex-shrink: 0; }
+        .ci-label {
+          font-family: 'Share Tech Mono', monospace;
+          font-size: .65rem; color: var(--dim);
+          letter-spacing: 2px; text-transform: uppercase; margin-bottom: 4px;
+        }
+        .ci-val {
+          font-size: .9rem; color: var(--text);
+        }
+        .ci-val a { color: var(--cyan); text-decoration: none; }
+
+        .contact-cta {
+          display: flex; flex-direction: column; justify-content: center;
+        }
+        .contact-cta h3 {
+          font-family: 'Orbitron', monospace;
+          font-size: 1.4rem; font-weight: 700;
+          color: #fff; text-transform: uppercase;
+          letter-spacing: 1px; margin-bottom: 16px;
+        }
+        .contact-cta p {
+          font-size: .9rem; line-height: 1.8;
+          color: #5a8aaa; margin-bottom: 32px;
+        }
+
+        /* Glitch badge */
+        .glitch-badge {
+          display: inline-flex; align-items: center; gap: 10px;
+          font-family: 'Share Tech Mono', monospace;
+          font-size: .7rem; color: var(--green);
+          border: 1px solid rgba(0,255,136,0.2);
+          padding: 8px 16px; margin-bottom: 32px;
+          letter-spacing: 2px;
+        }
+        .badge-dot {
+          width: 6px; height: 6px; border-radius: 50%;
+          background: var(--green);
+          animation: pulse 2s ease-in-out infinite;
+        }
+        @keyframes pulse {
+          0%, 100% { box-shadow: 0 0 4px var(--green); }
+          50% { box-shadow: 0 0 12px var(--green), 0 0 24px rgba(0,255,136,0.3); }
+        }
+
+        /* Footer */
+        footer {
+          position: relative; z-index: 1;
+          border-top: 1px solid var(--border);
+          padding: 32px 60px;
+          display: flex; justify-content: space-between; align-items: center;
+          max-width: 100%;
+        }
+        .footer-text {
+          font-family: 'Share Tech Mono', monospace;
+          font-size: .7rem; color: var(--dim); letter-spacing: 2px;
+        }
+        .footer-text span { color: var(--cyan); }
+
+        /* Scroll reveal */
+        .reveal { opacity: 0; transform: translateY(30px); transition: opacity .7s ease, transform .7s ease; }
+        .reveal.visible { opacity: 1; transform: translateY(0); }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+          nav { padding: 16px 24px; }
+          .nav-links { display: none; }
+          #hero, section { padding: 80px 24px; }
+          .about-grid, .projects-grid, .contact-grid { grid-template-columns: 1fr; gap: 32px; }
+          .hero-stats { gap: 24px; flex-wrap: wrap; }
+          footer { flex-direction: column; gap: 12px; padding: 24px; }
+        }
+    </style>
+</head>
+<body>
+
+<div id="cursor"></div>
+<div id="cursor-ring"></div>
+
+<!-- NAV -->
+<nav>
+    <a class="nav-logo" href="#hero">SIN<span>AN</span>.DEV</a>
+    <ul class="nav-links">
+        <li><a href="#about">About</a></li>
+        <li><a href="#skills">Skills</a></li>
+        <li><a href="#projects">Projects</a></li>
+        <li><a href="#experience">Experience</a></li>
+        <li><a href="#contact">Contact</a></li>
+    </ul>
+</nav>
+
+<!-- HERO -->
+<div id="hero" style="position:relative">
+    <div class="hud-box hud-tl">
+        SYS_STATUS: ONLINE<br>
+        BUILD: v2.4.1<br>
+        ENV: PRODUCTION<br>
+        STACK: ODOO · PYTHON · ERP
+    </div>
+    <div class="hud-box hud-br">
+        LAT: 11.1085° N<br>
+        LON: 75.8563° E<br>
+        LOC: KERALA.IN
+    </div>
+
+    <div class="hero-inner">
+        <div class="glitch-badge"><span class="badge-dot"></span>Available for new opportunities</div>
+        <div class="hero-tag">Odoo ERP · Python Developer</div>
+        <h1 class="hero-name">Mohammed<br><span class="cyan">Sinan P</span></h1>
+        <div class="hero-title">Building <span class="highlight">ERP Systems</span> · Automating Workflows</div>
+        <p class="hero-desc">
+            Odoo ERP Developer with hands-on production experience in Python module development, ORM-driven business
+            logic, and full-cycle ERP solutions for India and UAE-based clients.
+        </p>
+        <div class="hero-btns">
+            <a href="#projects" class="btn-primary">View Projects</a>
+            <a href="#contact" class="btn-outline">Contact Me</a>
+        </div>
+
+        <div class="hero-stats">
+            <div>
+                <div class="stat-num">8+</div>
+                <div class="stat-label">Months Production Exp</div>
+            </div>
+            <div>
+                <div class="stat-num">2</div>
+                <div class="stat-label">Live ERP Deployments</div>
+            </div>
+            <div>
+                <div class="stat-num">40%</div>
+                <div class="stat-label">Manual Entry Reduced</div>
+            </div>
+            <div>
+                <div class="stat-num">0</div>
+                <div class="stat-label">Critical Downtime</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ABOUT -->
+<section id="about">
+    <div class="section-label reveal">01 // About</div>
+    <h2 class="section-title reveal">Who Am <span>I</span></h2>
+
+    <div class="about-grid">
+        <div class="about-text reveal">
+            <p>
+                I'm Mohammed Sinan P, an Odoo ERP Developer based in Vengara, Kerala. I specialize in building custom
+                Python modules, automating business workflows, and designing QWeb reports for production ERP
+                environments.
+            </p>
+            <p>
+                Currently working at Prosevo Technologies, I've delivered end-to-end ERP solutions for trading and
+                service-sector clients across India and UAE — handling everything from sales pipelines to GST-compliant
+                invoicing.
+            </p>
+            <p>
+                I'm passionate about turning complex business processes into clean, automated systems that eliminate
+                manual overhead and improve operational visibility.
+            </p>
+
+            <div class="about-details">
+                <div class="detail-row"><span class="detail-key">Location</span><span class="detail-val">Vengara, Kerala, India</span>
+                </div>
+                <div class="detail-row"><span class="detail-key">Email</span><span class="detail-val"><a
+                        href="mailto:sinanpakkiyan@gmail.com">sinanpakkiyan@gmail.com</a></span></div>
+                <div class="detail-row"><span class="detail-key">Phone</span><span
+                        class="detail-val">+91-7994464678</span></div>
+                <div class="detail-row"><span class="detail-key">GitHub</span><span class="detail-val"><a
+                        href="https://github.com/sinan-pakkiyan" target="_blank">sinan-pakkiyan</a></span></div>
+                <div class="detail-row"><span class="detail-key">LinkedIn</span><span class="detail-val"><a
+                        href="https://linkedin.com/in/sinan-sideeq-78606633a/" target="_blank">sinan-sideeq</a></span>
+                </div>
+                <div class="detail-row"><span class="detail-key">Education</span><span class="detail-val">BCA — University of Calicut (CGPA: 7.19)</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="reveal">
+            <div class="terminal">
+                <div class="terminal-bar">
+                    <div class="t-dot r"></div>
+                    <div class="t-dot y"></div>
+                    <div class="t-dot g"></div>
+                    <span class="terminal-title">sinan@prosevo ~ $ profile.py</span>
+                </div>
+                <div class="terminal-body">
+                    <div class="t-line"><span class="t-dim"># Loading developer profile...</span></div>
+                    <br>
+                    <div class="t-line"><span class="t-cyan">class</span> <span class="t-white">Developer</span>:</div>
+                    <div class="t-line">&nbsp;&nbsp;name <span class="t-dim">=</span> <span class="t-orange">"Mohammed Sinan P"</span>
+                    </div>
+                    <div class="t-line">&nbsp;&nbsp;role <span class="t-dim">=</span> <span class="t-orange">"Odoo ERP Developer"</span>
+                    </div>
+                    <div class="t-line">&nbsp;&nbsp;company <span class="t-dim">=</span> <span class="t-orange">"Prosevo Technologies"</span>
+                    </div>
+                    <div class="t-line">&nbsp;&nbsp;experience <span class="t-dim">=</span> <span
+                            class="t-white">8</span> <span class="t-dim"># months</span></div>
+                    <br>
+                    <div class="t-line">&nbsp;&nbsp;skills <span class="t-dim">=</span> [</div>
+                    <div class="t-line">&nbsp;&nbsp;&nbsp;&nbsp;<span class="t-orange">"Python"</span>, <span
+                            class="t-orange">"Odoo 17/18"</span>,
+                    </div>
+                    <div class="t-line">&nbsp;&nbsp;&nbsp;&nbsp;<span class="t-orange">"PostgreSQL"</span>, <span
+                            class="t-orange">"QWeb"</span>,
+                    </div>
+                    <div class="t-line">&nbsp;&nbsp;&nbsp;&nbsp;<span class="t-orange">"Git"</span>, <span
+                            class="t-orange">"XML"</span></div>
+                    <div class="t-line">&nbsp;&nbsp;]</div>
+                    <br>
+                    <div class="t-line">&nbsp;&nbsp;status <span class="t-dim">=</span> <span class="t-orange">"open_to_work"</span>
+                    </div>
+                    <br>
+                    <div class="t-line"><span class="t-dim">>>> </span>dev <span class="t-dim">=</span> Developer()
+                    </div>
+                    <div class="t-line"><span class="t-dim">>>> </span>dev.deploy() <span class="t-dim"># ✓ ready</span>
+                    </div>
+                    <div class="t-line"><span class="t-dim">&nbsp;&nbsp;</span><span class="t-cursor"></span></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- SKILLS -->
+<section id="skills">
+    <div class="section-label reveal">02 // Skills</div>
+    <h2 class="section-title reveal">Tech <span>Arsenal</span></h2>
+
+    <div class="skills-grid">
+        <div class="skill-card reveal">
+            <div class="skill-icon">🐍</div>
+            <div class="skill-name">Python</div>
+            <p style="font-size:.83rem;color:#5a8aaa;line-height:1.7">Core language for all Odoo module development —
+                ORM logic, computed fields, onchange handlers, and business automation.</p>
+            <div class="skill-tags">
+                <span class="tag">Python 3</span>
+                <span class="tag">ORM</span>
+                <span class="tag">Business Logic</span>
+            </div>
+        </div>
+
+        <div class="skill-card reveal">
+            <div class="skill-icon">⚙️</div>
+            <div class="skill-name">Odoo ERP</div>
+            <p style="font-size:.83rem;color:#5a8aaa;line-height:1.7">Production experience in Odoo 17 & 18 — custom
+                modules, workflow automation, role-based XML views, and multi-client deployments.</p>
+            <div class="skill-tags">
+                <span class="tag">Odoo 17/18</span>
+                <span class="tag">Custom Modules</span>
+                <span class="tag">Workflows</span>
+            </div>
+        </div>
+
+        <div class="skill-card reveal">
+            <div class="skill-icon">📄</div>
+            <div class="skill-name">QWeb & XML</div>
+            <p style="font-size:.83rem;color:#5a8aaa;line-height:1.7">Designed invoice, delivery, and service-report
+                templates deployed in live client environments with full company branding.</p>
+            <div class="skill-tags">
+                <span class="tag">QWeb Reports</span>
+                <span class="tag">XML Views</span>
+                <span class="tag">Form/List/Kanban</span>
+            </div>
+        </div>
+
+        <div class="skill-card reveal">
+            <div class="skill-icon">🗄️</div>
+            <div class="skill-name">PostgreSQL</div>
+            <p style="font-size:.83rem;color:#5a8aaa;line-height:1.7">Database management for ERP backends — query
+                optimization, issue resolution, and zero critical downtime maintained across projects.</p>
+            <div class="skill-tags">
+                <span class="tag">PostgreSQL</span>
+                <span class="tag">SQL</span>
+                <span class="tag">DB Optimization</span>
+            </div>
+        </div>
+
+        <div class="skill-card reveal">
+            <div class="skill-icon">🌿</div>
+            <div class="skill-name">Git & DevOps</div>
+            <p style="font-size:.83rem;color:#5a8aaa;line-height:1.7">Feature-branch workflow, version control across
+                all client projects, and collaborative development with Git/GitHub.</p>
+            <div class="skill-tags">
+                <span class="tag">Git</span>
+                <span class="tag">GitHub</span>
+                <span class="tag">Feature Branching</span>
+            </div>
+        </div>
+
+        <div class="skill-card reveal">
+            <div class="skill-icon">🔐</div>
+            <div class="skill-name">Security & Web</div>
+            <p style="font-size:.83rem;color:#5a8aaa;line-height:1.7">Cyber Security certified by RedTeam Hacker
+                Academy. Web development training with foundational JavaScript skills.</p>
+            <div class="skill-tags">
+                <span class="tag">Cyber Security</span>
+                <span class="tag">JavaScript</span>
+                <span class="tag">Web Dev</span>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- PROJECTS -->
+<section id="projects">
+    <div class="section-label reveal">03 // Projects</div>
+    <h2 class="section-title reveal">Key <span>Deployments</span></h2>
+
+    <div class="projects-grid">
+        <div class="project-card reveal">
+            <div class="project-num">PROJECT // 001</div>
+            <div class="project-name">Plywood Trading Management System</div>
+            <div class="project-tech">Odoo · Python · XML · PostgreSQL · QWeb</div>
+            <p class="project-desc">End-to-end ERP solution for an India-based plywood trading company — covering sales,
+                inventory, invoicing, and customer management.</p>
+            <ul class="project-bullets">
+                <li>GST-compliant E-Invoice generation & E-Way Bill integration</li>
+                <li>Automated invoice generation on sales order confirmation</li>
+                <li>Real-time stock tracking with intelligent reorder alerts</li>
+                <li>Custom QWeb invoice & delivery reports with company branding</li>
+            </ul>
+        </div>
+
+        <div class="project-card reveal">
+            <div class="project-num">PROJECT // 002</div>
+            <div class="project-name">Firefighting Solutions ERP</div>
+            <div class="project-tech">Odoo · Python · XML · QWeb</div>
+            <p class="project-desc">ERP customization for a UAE-based company providing firefighting solutions for
+                commercial and industrial sectors.</p>
+            <ul class="project-bullets">
+                <li>Project-based sales and service workflow customization</li>
+                <li>Quotation-to-invoice automation for equipment & service contracts</li>
+                <li>Custom XML views for product specs and service records</li>
+                <li>Operational documents via QWeb for industrial clients</li>
+            </ul>
+        </div>
+    </div>
+</section>
+
+<!-- EXPERIENCE -->
+<section id="experience">
+    <div class="section-label reveal">04 // Experience</div>
+    <h2 class="section-title reveal">Work <span>History</span></h2>
+
+    <div class="timeline">
+        <div class="tl-item reveal">
+            <div class="tl-dot"></div>
+            <div class="tl-date">JULY 2024 — PRESENT</div>
+            <div class="tl-role">Odoo Developer</div>
+            <div class="tl-company">Prosevo Technologies · Vengara, Kerala</div>
+            <ul class="tl-points">
+                <li>Built custom Odoo modules in Python, extending ERP functionality for trading and service-sector
+                    clients
+                </li>
+                <li>Implemented ORM logic — computed fields, onchange, inheritance — reducing manual data entry by
+                    ~40%
+                </li>
+                <li>Designed role-based XML views (form, list, kanban) tailored to client workflows, improving UI
+                    adoption
+                </li>
+                <li>Engineered QWeb invoice, delivery, and service-report templates in live environments</li>
+                <li>Automated sales-to-invoice and service-to-delivery pipelines, eliminating multi-step manual
+                    handoffs
+                </li>
+                <li>Resolved production Odoo errors and PostgreSQL issues, maintaining zero critical downtime</li>
+                <li>Managed codebase via Git with feature-branch workflow across all client projects</li>
+            </ul>
+        </div>
+
+        <div class="tl-item reveal">
+            <div class="tl-dot" style="background:var(--green);box-shadow:0 0 12px var(--green)"></div>
+            <div class="tl-date">2024 — 2025</div>
+            <div class="tl-role">Certifications</div>
+            <div class="tl-company">RedTeam Hacker Academy · RISS Technologies</div>
+            <ul class="tl-points">
+                <li>Cyber Security Certification — RedTeam Hacker Academy (2024)</li>
+                <li>Web Development Training — RISS Technologies, Calicut (2025)</li>
+                <li>Bachelor of Computer Applications (BCA) — University of Calicut, CGPA: 7.19 (2022–2025)</li>
+            </ul>
+        </div>
+    </div>
+</section>
+
+<!-- CONTACT -->
+<section id="contact">
+    <div class="section-label reveal">05 // Contact</div>
+    <h2 class="section-title reveal">Get In <span>Touch</span></h2>
+
+    <div class="contact-grid">
+        <div class="contact-info reveal">
+            <div class="contact-item">
+                <div class="ci-icon">📧</div>
+                <div>
+                    <div class="ci-label">Email</div>
+                    <div class="ci-val"><a href="mailto:sinanpakkiyan@gmail.com">sinanpakkiyan@gmail.com</a></div>
+                </div>
+            </div>
+            <div class="contact-item">
+                <div class="ci-icon">📱</div>
+                <div>
+                    <div class="ci-label">Phone</div>
+                    <div class="ci-val">+91-7994464678</div>
+                </div>
+            </div>
+            <div class="contact-item">
+                <div class="ci-icon">💼</div>
+                <div>
+                    <div class="ci-label">LinkedIn</div>
+                    <div class="ci-val"><a href="https://linkedin.com/in/sinan-sideeq-78606633a/" target="_blank">linkedin.com/in/sinan-sideeq</a>
+                    </div>
+                </div>
+            </div>
+            <div class="contact-item">
+                <div class="ci-icon">🐙</div>
+                <div>
+                    <div class="ci-label">GitHub</div>
+                    <div class="ci-val"><a href="https://github.com/sinan-pakkiyan" target="_blank">github.com/sinan-pakkiyan</a>
+                    </div>
+                </div>
+            </div>
+            <div class="contact-item">
+                <div class="ci-icon">🌐</div>
+                <div>
+                    <div class="ci-label">Portfolio Live</div>
+                    <div class="ci-val"><a href="https://sinansideeq.lovable.app" target="_blank">sinansideeq.lovable.app</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="contact-cta reveal">
+            <h3>Let's Build Something</h3>
+            <p>
+                I'm open to new opportunities, freelance ERP projects, and collaborations. Whether you need a custom
+                Odoo module, workflow automation, or a full ERP implementation — let's talk.
+            </p>
+            <a href="mailto:sinanpakkiyan@gmail.com" class="btn-primary">Send a Message</a>
+        </div>
+    </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+    <div class="footer-text">© 2025 <span>Mohammed Sinan P</span> · All systems operational</div>
+    <div class="footer-text">Built with <span>Python · Odoo · Passion</span></div>
+</footer>
+
+<script>
+    // Custom cursor
+    const cursor = document.getElementById('cursor');
+    const ring = document.getElementById('cursor-ring');
+    let mx = 0, my = 0, rx = 0, ry = 0;
+    document.addEventListener('mousemove', e => { mx = e.clientX; my = e.clientY; });
+    function animateCursor() {
+      rx += (mx - rx) * 0.15;
+      ry += (my - ry) * 0.15;
+      cursor.style.left = mx + 'px'; cursor.style.top = my + 'px';
+      ring.style.left = rx + 'px'; ring.style.top = ry + 'px';
+      requestAnimationFrame(animateCursor);
+    }
+    animateCursor();
+
+    // Scroll reveal
+    const reveals = document.querySelectorAll('.reveal');
+    const observer = new IntersectionObserver(entries => {
+      entries.forEach((entry, i) => {
+        if (entry.isIntersecting) {
+          setTimeout(() => entry.target.classList.add('visible'), i * 80);
+        }
+      });
+    }, { threshold: 0.12 });
+    reveals.forEach(el => observer.observe(el));
+
+    // Glitch on hero name
+    const name = document.querySelector('h1.hero-name');
+    if (name) {
+      setInterval(() => {
+        name.style.textShadow = `2px 0 var(--cyan), -2px 0 var(--orange)`;
+        setTimeout(() => name.style.textShadow = 'none', 80);
+      }, 4000);
+    }
+</script>
+</body>
+</html>
