@@ -328,11 +328,14 @@ section { position:relative; z-index:1; padding:120px 60px; }
   background: linear-gradient(90deg, var(--accent), var(--accent2), transparent);
 }
 .about-avatar-wrap {
-  width:120px; height:120px; border-radius:50%;
+  width:140px; height:140px; border-radius:50%;
   border:2px solid var(--border); position:relative;
   margin-bottom:32px; background: var(--surface2);
   display:flex; align-items:center; justify-content:center;
-  font-size:3rem;
+  overflow:hidden;
+}
+.about-avatar-wrap img {
+  width:100%; height:100%; object-fit:cover;
 }
 .about-avatar-wrap::after {
   content:''; position:absolute; inset:-4px; border-radius:50%;
@@ -738,7 +741,9 @@ footer {
   </div>
   <div class="about-grid">
     <div class="about-card reveal-left">
-      <div class="about-avatar-wrap">👨‍💻</div>
+      <div class="about-avatar-wrap">
+        <img src="my_image.jpeg" alt="Mohammed Sinan P">
+      </div>
       <div class="about-name">Mohammed Sinan P</div>
       <div class="about-title-tag">Odoo ERP Developer · Python Engineer</div>
       <p class="about-bio">
@@ -1038,15 +1043,15 @@ footer {
       <div class="contact-form">
         <div class="form-group">
           <label class="form-label">Your Name</label>
-          <input class="form-input" type="text" placeholder="John Doe">
+          <input class="form-input" type="text" id="contactName" placeholder="John Doe">
         </div>
         <div class="form-group">
           <label class="form-label">Your Email</label>
-          <input class="form-input" type="email" placeholder="john@example.com">
+          <input class="form-input" type="email" id="contactEmail" placeholder="john@example.com">
         </div>
         <div class="form-group">
           <label class="form-label">Message</label>
-          <textarea class="form-textarea" placeholder="Tell me about your project..."></textarea>
+          <textarea class="form-textarea" id="contactMessage" placeholder="Tell me about your project..."></textarea>
         </div>
         <button class="form-submit" onclick="handleFormSubmit(this)">Send Message ✉️</button>
       </div>
@@ -1157,14 +1162,39 @@ document.addEventListener('mousemove', e => {
 // FORM SUBMIT
 // ═══════════════════════════════════════
 function handleFormSubmit(btn) {
+  const name = document.getElementById('contactName').value.trim();
+  const email = document.getElementById('contactEmail').value.trim();
+  const message = document.getElementById('contactMessage').value.trim();
+
+  if (!name || !message) {
+    alert('Please enter your name and a message.');
+    return;
+  }
+
   const original = btn.innerHTML;
-  btn.innerHTML = 'Sending... ⏳';
+  btn.innerHTML = 'Opening Email... ⏳';
   btn.style.opacity = '0.7';
+
+  // Format message for Gmail/Email
+  const fullMessage = `Hello Sinan,\n\nName: ${name}\nEmail: ${email}\n\nMessage: ${message}`;
+  const encodedMsg = encodeURIComponent(fullMessage);
+  
+  // Gmail/Email Redirect (opens the user's default email app)
+  const mailtoUrl = `mailto:sinanpakkiyan@gmail.com?subject=Portfolio Inquiry from ${name}&body=${encodedMsg}`;
+
   setTimeout(() => {
     btn.innerHTML = 'Sent! 🎉';
     btn.style.background = '#00cc8c';
-    setTimeout(() => { btn.innerHTML = original; btn.style.opacity = '1'; btn.style.background = ''; }, 2500);
-  }, 1200);
+    
+    // Redirect to Email
+    window.location.href = mailtoUrl;
+
+    setTimeout(() => { 
+        btn.innerHTML = original; 
+        btn.style.opacity = '1'; 
+        btn.style.background = ''; 
+    }, 2500);
+  }, 600);
 }
 
 // ═══════════════════════════════════════
